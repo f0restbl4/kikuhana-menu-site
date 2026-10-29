@@ -6,7 +6,10 @@ const BASE = new URL('./', self.location).pathname;           // '/' или '/re
 const SHELL_FILES = ['./', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-180.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(SHELL).then(c => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
+  // cache:'reload' — брать файлы с сервера, а не из HTTP-кэша браузера (GitHub Pages кэширует на 10 минут)
+  e.waitUntil(caches.open(SHELL).then(c => Promise.all(SHELL_FILES.map(f =>
+    fetch(new Request(f, {cache: 'reload'})).then(r => { if (!r.ok) throw new Error(f); return c.put(f, r); })
+  ))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -37,7 +40,7 @@ self.addEventListener('fetch', e => {
   }
 
   e.respondWith(
-    fetch(req).then(res => {
+    fetch(req, {cache: 'no-cache'}).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)); }
       return res;
     }).catch(() => caches.match(req, {ignoreSearch: true}).then(r => r || caches.match('./')))
