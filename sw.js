@@ -1,6 +1,6 @@
 /* Офлайн-кэш: страницы меню — cache-first (путь содержит версию), остальное — network-first с запасом из кэша.
    Пути считаются от места, где лежит sw.js, поэтому работает и в корне домена, и во вложенной папке. */
-const SHELL = 'shell-v2';
+const SHELL = 'shell-v3';
 const PAGES = 'pages';
 const BASE = new URL('./', self.location).pathname;           // '/' или '/repo/'
 const SHELL_FILES = ['./', 'style.css', 'app.js', 'manifest.webmanifest', 'icons/icon-180.png'];
