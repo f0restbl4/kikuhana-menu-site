@@ -155,12 +155,7 @@
     try {
       const m = await loadManifest();
       if (!m) { if (!M) say('Нет связи.\nМеню ещё не загружено на это устройство.'); return; }
-      if (m.settings && m.settings.idle_seconds) {
-        const v = m.settings.idle_seconds * 1000;
-        // bump() только при смене значения: раньше он вызывался при каждой проверке (каждые 3 мин)
-        // и сбрасывал таймер бездействия, который ждёт 5 мин, так что onIdle не срабатывал никогда
-        if (v !== idleMs) { idleMs = v; bump(); }
-      }
+      if (m.settings && m.settings.idle_seconds) { idleMs = m.settings.idle_seconds * 1000; bump(); }
       if (!m.pages.length) { if (!M) say('Меню ещё не загружено.\nОткройте /admin и загрузите PDF.'); return; }
       if (!M) {
         M = m; say(''); build(); bump();
@@ -174,11 +169,7 @@
   // ---------- запуск ----------
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   document.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) return;
-    if (pending) { location.reload(); return; }   // новая версия уже скачана, планшет проснулся — применяем
-    check();
-  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
   addEventListener('online', check);
   check();
   setInterval(check, POLL_MS);
